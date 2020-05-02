@@ -47,7 +47,7 @@ def handle_dialog(req, res):
         res['response']['buttons'] = get_suggests(user_id)
         return
 
-    if req['request']['original_utterance'].lower() in ['ладно', 'куплю', 'покупаю', 'хорошо']:
+    if req['request']['original_utterance'].lower() in ['ладно', 'куплю', 'покупаю', 'хорошо', 'я покупаю', 'я куплю']:
         res['response']['text'] = 'Слона можно найти на Яндекс.Маркете!'
         res['response']['end_session'] = True
         return
@@ -78,5 +78,6 @@ def get_suggests(user_id):
 
 
 if __name__ == '__main__':
+    # https://yandex-alice-luceum.herokuapp.com
     port = int(environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
