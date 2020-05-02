@@ -1,5 +1,6 @@
 import json
 import logging
+from os import environ
 
 from flask import Flask, request
 
@@ -77,4 +78,5 @@ def get_suggests(user_id):
 
 
 if __name__ == '__main__':
-    app.run(host='yandex-alice-luceum.herokuapp.com')
+    port = int(environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
