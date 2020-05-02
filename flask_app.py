@@ -51,9 +51,17 @@ def handle_dialog(req, res):
         return
 
     if req['request']['original_utterance'].lower() in ['ладно', 'куплю', 'покупаю', 'хорошо', 'я покупаю', 'я куплю']:
-        res['response']['text'] = f'{animals[sessionAnimal[user_id]].capitalize()} можно найти на Яндекс.Маркете!'
+        last = sessionAnimal[user_id] + 1 == len(animals)
+        res['response']['text'] = f'{animals[sessionAnimal[user_id]].capitalize()} можно найти на Яндекс.Маркете!' + (f' А купи ещё {animals[sessionAnimal[user_id] + 1]}!' if not last else '')
         sessionAnimal[user_id] += 1
-        if sessionAnimal[user_id] == len(animals):
+        sessionStorage[user_id] = {
+            'suggests': [
+                "Не хочу.",
+                "Не буду.",
+                "Отстань!",
+            ]
+        }
+        if last:
             res['response']['end_session'] = True
         return
 
