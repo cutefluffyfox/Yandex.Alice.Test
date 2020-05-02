@@ -51,8 +51,6 @@ def handle_dialog(req, res):
         return
 
     if req['request']['original_utterance'].lower() in ['ладно', 'куплю', 'покупаю', 'хорошо', 'я покупаю', 'я куплю']:
-        last = sessionAnimal[user_id] + 1 == len(animals)
-        res['response']['text'] = f'{animals[sessionAnimal[user_id]].capitalize()} можно найти на Яндекс.Маркете!' + (f' А купи ещё {animals[sessionAnimal[user_id] + 1]}!' if not last else '')
         sessionAnimal[user_id] += 1
         sessionStorage[user_id] = {
             'suggests': [
@@ -61,6 +59,9 @@ def handle_dialog(req, res):
                 "Отстань!",
             ]
         }
+        last = sessionAnimal[user_id] == len(animals)
+        res['response']['text'] = f'{animals[sessionAnimal[user_id]].capitalize()} можно найти на Яндекс.Маркете!' + (f' А купи ещё {animals[sessionAnimal[user_id] + 1]}!' if not last else '')
+        res['response']['buttons'] = get_suggests(user_id)
         if last:
             res['response']['end_session'] = True
         return
