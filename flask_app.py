@@ -7,8 +7,10 @@ from flask import Flask, request
 app = Flask(__name__)
 
 logging.basicConfig(level=logging.INFO)
+animals = ['слона', 'кролика']
 
 sessionStorage = {}
+sessionAnimal = {}
 
 
 @app.route('/', methods=['GET'])
@@ -43,16 +45,19 @@ def handle_dialog(req, res):
                 "Отстань!",
             ]
         }
-        res['response']['text'] = 'Привет! Купи слона!'
+        sessionAnimal[user_id] = 0
+        res['response']['text'] = f'Привет! Купи {animals[sessionAnimal[user_id]]}!'
         res['response']['buttons'] = get_suggests(user_id)
         return
 
     if req['request']['original_utterance'].lower() in ['ладно', 'куплю', 'покупаю', 'хорошо', 'я покупаю', 'я куплю']:
-        res['response']['text'] = 'Слона можно найти на Яндекс.Маркете!'
-        res['response']['end_session'] = True
+        res['response']['text'] = f'{animals[sessionAnimal[user_id]].capitalize()} можно найти на Яндекс.Маркете!'
+        sessionAnimal[user_id] += 1
+        if sessionAnimal[user_id] == len(animals):
+            res['response']['end_session'] = True
         return
 
-    res['response']['text'] = f"Все говорят '{req['request']['original_utterance']}', а ты купи слона!"
+    res['response']['text'] = f"Все говорят '{req['request']['original_utterance']}', а ты купи {animals[sessionAnimal[user_id]]}!"
     res['response']['buttons'] = get_suggests(user_id)
 
 
