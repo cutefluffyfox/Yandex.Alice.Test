@@ -37,7 +37,8 @@ def handle_dialog(res: dict, req: dict):
     language = get_language(req)
     translate = get_translate(req)
     if language is not None:
-        if translate_text('кот', language) == 'The specified translation direction is not supported':
+        if translate_text('кот', language) in ['The specified translation direction is not supported',
+                                               'Invalid parameter: lang']:
             res['response']['text'] = 'Неверный код языка'
         else:
             res['response']['text'] = 'Язык успешно изменён'
