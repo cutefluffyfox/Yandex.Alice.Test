@@ -49,10 +49,11 @@ def handle_dialog(res: dict, req: dict):
     if sessionStorage[user_id]['country_guess'] is not None:
         city = sessionStorage[user_id]['country_guess']
         country = get_geo_info(city, 'country')
+        print(country, get_country(req))
         if get_country(req) == country:
             res['response']['text'] = 'Правильно! Хотите сыграть ещё раз?'
         else:
-            res['response']['text'] = f'Неверно, {city} находится в {country}. Хотите сыграть ещё раз?'
+            res['response']['text'] = f'Неверно, {city} это {country}. Хотите сыграть ещё раз?'
         res['response']['buttons'].extend(
             [
                 {
@@ -163,7 +164,7 @@ def play_game(res: dict, req: dict):
         if get_city(req) == city:
             # если да, то добавляем город к sessionStorage[user_id]['guessed_cities'] и
             # отправляем пользователя на второй круг. Обратите внимание на этот шаг на схеме.
-            res['response']['text'] = 'Правильно! А в какой стране этот город?'
+            res['response']['text'] = 'Правильно! А какая это страна?'
             sessionStorage[user_id]['guessed_cities'].append(city)
             sessionStorage[user_id]['game_started'] = False
             sessionStorage[user_id]['country_guess'] = city
@@ -175,7 +176,7 @@ def play_game(res: dict, req: dict):
                 # В этом случае говорим ответ пользователю,
                 # добавляем город к sessionStorage[user_id]['guessed_cities'] и отправляем его на второй круг.
                 # Обратите внимание на этот шаг на схеме.
-                res['response']['text'] = f'Вы пытались. Это {city.title()}. А в какой стране этот город?'
+                res['response']['text'] = f'Вы пытались. Это {city.title()}. А какая это страна?'
                 sessionStorage[user_id]['game_started'] = False
                 sessionStorage[user_id]['guessed_cities'].append(city)
                 sessionStorage[user_id]['country_guess'] = city
