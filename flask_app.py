@@ -34,7 +34,7 @@ def main():
     return json.dumps(response)
 
 
-def handle_dialog(res, req):
+def handle_dialog(res: dict, req: dict):
     user_id = req['session']['user_id']
     if req['session']['new']:
         res['response']['text'] = 'Привет! Назови своё имя!'
@@ -42,8 +42,11 @@ def handle_dialog(res, req):
             'first_name': None,  # здесь будет храниться имя
             'game_started': False  # здесь информация о том, что пользователь начал игру. По умолчанию False
         }
+        res['response']['buttons'] = [{'title': 'Помошь', 'hide': False}]
         return
-
+    if 'помощь' in req['request']['nlu']['tokens']:
+        res['response']['text'] = 'Это игра по угадыванию страны. Я показываю вам фото и вы, должны угадать, какуб страну я вам показываю.'
+        return
     if sessionStorage[user_id]['first_name'] is None:
         first_name = get_first_name(req)
         if first_name is None:
@@ -104,7 +107,7 @@ def handle_dialog(res, req):
             play_game(res, req)
 
 
-def play_game(res, req):
+def play_game(res: dict, req: dict):
     user_id = req['session']['user_id']
     attempt = sessionStorage[user_id]['attempt']
     if attempt == 1:
@@ -154,7 +157,7 @@ def play_game(res, req):
     sessionStorage[user_id]['attempt'] += 1
 
 
-def get_city(req):
+def get_city(req: dict):
     # перебираем именованные сущности
     for entity in req['request']['nlu']['entities']:
         # если тип YANDEX.GEO, то пытаемся получить город(city), если нет, то возвращаем None
@@ -163,7 +166,7 @@ def get_city(req):
             return entity['value'].get('city', None)
 
 
-def get_first_name(req):
+def get_first_name(req: dict):
     # перебираем сущности
     for entity in req['request']['nlu']['entities']:
         # находим сущность с типом 'YANDEX.FIO'
