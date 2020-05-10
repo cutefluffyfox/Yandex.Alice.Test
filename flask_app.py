@@ -49,11 +49,10 @@ def handle_dialog(res: dict, req: dict):
     if sessionStorage[user_id]['country_guess'] is not None:
         city = sessionStorage[user_id]['country_guess']
         country = get_geo_info(city, 'country')
-        print(country, get_country(req))
         if get_country(req) == country.lower():
-            res['response']['text'] = 'Правильно! Хотите сыграть ещё раз?'
+            res['response']['text'] = f'Правильно, {sessionStorage[user_id]["first_name"]}! Хотите сыграть ещё раз?'
         else:
-            res['response']['text'] = f'Неверно, {city} это {country}. Хотите сыграть ещё раз?'
+            res['response']['text'] = f'Неверно, {sessionStorage[user_id]["first_name"]}, {city} это {country}. Хотите сыграть ещё раз?'
         res['response']['buttons'].extend(
             [
                 {
@@ -74,14 +73,14 @@ def handle_dialog(res: dict, req: dict):
         sessionStorage[user_id]['country_guess'] = None
         return
     if 'помощь' in req['request']['nlu']['tokens']:
-        res['response']['text'] = 'Это игра по угадыванию страны. Я показываю вам фото и вы, должны угадать, какуб страну я вам показываю.'
+        res['response']['text'] = 'Это игра по угадыванию страны. Я показываю вам фото и вы, должны угадать, какую страну я вам показываю.'
         return
     if sessionStorage[user_id]['first_name'] is None:
         first_name = get_first_name(req)
         if first_name is None:
             res['response']['text'] = 'Не расслышала имя. Повтори, пожалуйста!'
         else:
-            sessionStorage[user_id]['first_name'] = first_name
+            sessionStorage[user_id]['first_name'] = first_name.title()
             # создаём пустой массив, в который будем записывать города, которые пользователь уже отгадал
             sessionStorage[user_id]['guessed_cities'] = []
             # как видно из предыдущего навыка, сюда мы попали, потому что пользователь написал своем имя.
@@ -110,7 +109,7 @@ def handle_dialog(res: dict, req: dict):
                 # По схеме можно увидеть, что здесь окажутся и пользователи, которые уже отгадывали города
                 if len(sessionStorage[user_id]['guessed_cities']) == len(cities):
                     # если все города отгаданы, то заканчиваем игру
-                    res['response']['text'] = 'Тебе удалось отгадать все города!'
+                    res['response']['text'] = f'Молодец, {sessionStorage[user_id]["first_name"]}, тебе удалось отгадать все города!'
                     res['end_session'] = True
                 else:
                     # если есть неотгаданные города, то продолжаем игру
@@ -164,7 +163,7 @@ def play_game(res: dict, req: dict):
         if get_city(req) == city:
             # если да, то добавляем город к sessionStorage[user_id]['guessed_cities'] и
             # отправляем пользователя на второй круг. Обратите внимание на этот шаг на схеме.
-            res['response']['text'] = 'Правильно! А какая это страна?'
+            res['response']['text'] = f'Правильно, {sessionStorage[user_id]["first_name"]}! А какая это страна?'
             sessionStorage[user_id]['guessed_cities'].append(city)
             sessionStorage[user_id]['game_started'] = False
             sessionStorage[user_id]['country_guess'] = city
@@ -176,7 +175,7 @@ def play_game(res: dict, req: dict):
                 # В этом случае говорим ответ пользователю,
                 # добавляем город к sessionStorage[user_id]['guessed_cities'] и отправляем его на второй круг.
                 # Обратите внимание на этот шаг на схеме.
-                res['response']['text'] = f'Вы пытались. Это {city.title()}. А какая это страна?'
+                res['response']['text'] = f'Вы пытались. Это {city.title()}. {sessionStorage[user_id]["first_name"]}, а какая это страна?'
                 sessionStorage[user_id]['game_started'] = False
                 sessionStorage[user_id]['guessed_cities'].append(city)
                 sessionStorage[user_id]['country_guess'] = city
