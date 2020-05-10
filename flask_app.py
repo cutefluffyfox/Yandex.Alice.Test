@@ -50,7 +50,7 @@ def handle_dialog(res: dict, req: dict):
         city = sessionStorage[user_id]['country_guess']
         country = get_geo_info(city, 'country')
         print(country, get_country(req))
-        if get_country(req) == country:
+        if get_country(req) == country.lower():
             res['response']['text'] = 'Правильно! Хотите сыграть ещё раз?'
         else:
             res['response']['text'] = f'Неверно, {city} это {country}. Хотите сыграть ещё раз?'
