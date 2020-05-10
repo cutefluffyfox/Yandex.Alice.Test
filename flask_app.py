@@ -36,13 +36,13 @@ def main():
 
 def handle_dialog(res: dict, req: dict):
     user_id = req['session']['user_id']
+    res['response']['buttons'] = [{'title': 'Помощь', 'hide': False}]
     if req['session']['new']:
         res['response']['text'] = 'Привет! Назови своё имя!'
         sessionStorage[user_id] = {
             'first_name': None,  # здесь будет храниться имя
             'game_started': False  # здесь информация о том, что пользователь начал игру. По умолчанию False
         }
-        res['response']['buttons'] = [{'title': 'Помошь', 'hide': False}]
         return
     if 'помощь' in req['request']['nlu']['tokens']:
         res['response']['text'] = 'Это игра по угадыванию страны. Я показываю вам фото и вы, должны угадать, какуб страну я вам показываю.'
@@ -58,7 +58,7 @@ def handle_dialog(res: dict, req: dict):
             # как видно из предыдущего навыка, сюда мы попали, потому что пользователь написал своем имя.
             # Предлагаем ему сыграть и два варианта ответа "Да" и "Нет".
             res['response']['text'] = f'Приятно познакомиться, {first_name.title()}. Я Алиса. Отгадаешь город по фото?'
-            res['response']['buttons'] = [
+            res['response']['buttons'].append(
                 {
                     'title': 'Да',
                     'hide': True
@@ -67,7 +67,7 @@ def handle_dialog(res: dict, req: dict):
                     'title': 'Нет',
                     'hide': True
                 }
-            ]
+            )
     else:
         # У нас уже есть имя, и теперь мы ожидаем ответ на предложение сыграть.
         # В sessionStorage[user_id]['game_started'] хранится True или False в зависимости от того,
