@@ -3,6 +3,7 @@ import logging
 import json
 import random
 from os import environ
+from geo import get_geo_info
 
 app = Flask(__name__)
 
@@ -41,8 +42,35 @@ def handle_dialog(res: dict, req: dict):
         res['response']['text'] = 'Привет! Назови своё имя!'
         sessionStorage[user_id] = {
             'first_name': None,  # здесь будет храниться имя
-            'game_started': False  # здесь информация о том, что пользователь начал игру. По умолчанию False
+            'game_started': False,  # здесь информация о том, что пользователь начал игру. По умолчанию False
+            'country_guess': None
         }
+        return
+    if sessionStorage[user_id]['country_guess'] is not None:
+        city = sessionStorage[user_id]['country_guess']
+        country = get_geo_info(city, 'country')
+        if get_country(req) == country:
+            res['response']['text'] = 'Правильно! Хотите сыграть ещё раз?'
+        else:
+            res['response']['text'] = f'Неверно, {city} находится в {country}. Хотите сыграть ещё раз?'
+        res['response']['buttons'].extend(
+            [
+                {
+                    'title': 'Да',
+                    'hide': True
+                },
+                {
+                    'title': 'Нет',
+                    'hide': True
+                },
+                {
+                    'title': 'Покажи город на карте',
+                    'url': f'https://yandex.ru/maps/?mode=search&text={city}',
+                    'hide': True
+                }
+            ]
+        )
+        sessionStorage[user_id]['country_guess'] = None
         return
     if 'помощь' in req['request']['nlu']['tokens']:
         res['response']['text'] = 'Это игра по угадыванию страны. Я показываю вам фото и вы, должны угадать, какуб страну я вам показываю.'
@@ -135,26 +163,10 @@ def play_game(res: dict, req: dict):
         if get_city(req) == city:
             # если да, то добавляем город к sessionStorage[user_id]['guessed_cities'] и
             # отправляем пользователя на второй круг. Обратите внимание на этот шаг на схеме.
-            res['response']['text'] = 'Правильно! Сыграем ещё?'
+            res['response']['text'] = 'Правильно! А в какой стране этот город?'
             sessionStorage[user_id]['guessed_cities'].append(city)
             sessionStorage[user_id]['game_started'] = False
-            res['response']['buttons'].extend(
-                [
-                    {
-                        'title': 'Да',
-                        'hide': True
-                    },
-                    {
-                        'title': 'Нет',
-                        'hide': True
-                    },
-                    {
-                        'title': 'Покажи город на карте',
-                        'url': f'https://yandex.ru/maps/?mode=search&text={city}',
-                        'hide': True
-                    }
-                ]
-            )
+            sessionStorage[user_id]['country_guess'] = city
             return
         else:
             # если нет
@@ -163,26 +175,10 @@ def play_game(res: dict, req: dict):
                 # В этом случае говорим ответ пользователю,
                 # добавляем город к sessionStorage[user_id]['guessed_cities'] и отправляем его на второй круг.
                 # Обратите внимание на этот шаг на схеме.
-                res['response']['text'] = f'Вы пытались. Это {city.title()}. Сыграем ещё?'
+                res['response']['text'] = f'Вы пытались. Это {city.title()}. А в какой стране этот город?'
                 sessionStorage[user_id]['game_started'] = False
                 sessionStorage[user_id]['guessed_cities'].append(city)
-                res['response']['buttons'].extend(
-                    [
-                        {
-                            'title': 'Да',
-                            'hide': True
-                        },
-                        {
-                            'title': 'Нет',
-                            'hide': True
-                        },
-                        {
-                            'title': 'Покажи город на карте',
-                            'url': f'https://yandex.ru/maps/?mode=search&text={city}',
-                            'hide': True
-                        }
-                    ]
-                )
+                sessionStorage[user_id]['country_guess'] = city
                 return
             else:
                 # иначе показываем следующую картинку
@@ -202,6 +198,15 @@ def get_city(req: dict):
         if entity['type'] == 'YANDEX.GEO':
             # возвращаем None, если не нашли сущности с типом YANDEX.GEO
             return entity['value'].get('city', None)
+
+
+def get_country(req: dict):
+    # перебираем именованные сущности
+    for entity in req['request']['nlu']['entities']:
+        # если тип YANDEX.GEO, то пытаемся получить страну(country), если нет, то возвращаем None
+        if entity['type'] == 'YANDEX.GEO':
+            # возвращаем None, если не нашли сущности с типом YANDEX.GEO
+            return entity['value'].get('country', None)
 
 
 def get_first_name(req: dict):
