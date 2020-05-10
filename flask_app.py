@@ -58,15 +58,17 @@ def handle_dialog(res: dict, req: dict):
             # как видно из предыдущего навыка, сюда мы попали, потому что пользователь написал своем имя.
             # Предлагаем ему сыграть и два варианта ответа "Да" и "Нет".
             res['response']['text'] = f'Приятно познакомиться, {first_name.title()}. Я Алиса. Отгадаешь город по фото?'
-            res['response']['buttons'].append(
-                {
-                    'title': 'Да',
-                    'hide': True
-                },
-                {
-                    'title': 'Нет',
-                    'hide': True
-                }
+            res['response']['buttons'].extend(
+                [
+                    {
+                        'title': 'Да',
+                        'hide': True
+                    },
+                    {
+                        'title': 'Нет',
+                        'hide': True
+                    }
+                ]
             )
     else:
         # У нас уже есть имя, и теперь мы ожидаем ответ на предложение сыграть.
@@ -93,16 +95,18 @@ def handle_dialog(res: dict, req: dict):
                 res['end_session'] = True
             else:
                 res['response']['text'] = 'Не поняла ответа! Так да или нет?'
-                res['response']['buttons'] = [
-                    {
-                        'title': 'Да',
-                        'hide': True
-                    },
-                    {
-                        'title': 'Нет',
-                        'hide': True
-                    }
-                ]
+                res['response']['buttons'].extend(
+                    [
+                        {
+                            'title': 'Да',
+                            'hide': True
+                        },
+                        {
+                            'title': 'Нет',
+                            'hide': True
+                        }
+                    ]
+                )
         else:
             play_game(res, req)
 
